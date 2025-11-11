@@ -8,11 +8,33 @@ import type {
   BacktestResponse,
 } from "@/types";
 
+// Mock API import (상대 경로 사용)
+import {
+  getMockSignals,
+  getMockReports,
+  getMockReportDownloadUrl,
+  runMockBacktest,
+  getMockBacktestStatus,
+  mockHealthCheck,
+} from "../mocks/api";
+
+/**
+ * Mock 데이터 사용 여부 (환경 변수로 제어)
+ */
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
+
 /**
  * API Base URL (환경변수에서 가져오기)
  */
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
+// 🔍 디버깅용 로그 (나중에 제거 가능)
+console.log("🔍 API Configuration:", {
+  USE_MOCK_DATA,
+  VITE_USE_MOCK_DATA: import.meta.env.VITE_USE_MOCK_DATA,
+  API_BASE_URL,
+});
 
 /**
  * Fetch 래퍼 - 에러 핸들링 포함
@@ -52,6 +74,11 @@ async function fetchApi<T>(
 export async function getSignals(
   params?: SignalsQueryParams
 ): Promise<ApiResponse<AnalysisResult>> {
+  if (USE_MOCK_DATA) {
+    console.log("📦 Using Mock Data for getSignals");
+    return getMockSignals(params);
+  }
+
   const queryString = params
     ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
     : "";
@@ -67,6 +94,11 @@ export async function getReports(
 ): Promise<
   ApiResponse<{ reports: Report[]; total: number; hasMore: boolean }>
 > {
+  if (USE_MOCK_DATA) {
+    console.log("📦 Using Mock Data for getReports");
+    return getMockReports(params);
+  }
+
   const queryString = params
     ? `?${new URLSearchParams(
         Object.entries(params).reduce((acc, [key, value]) => {
@@ -87,6 +119,10 @@ export async function getReports(
 export async function getReportDownloadUrl(
   reportId: string
 ): Promise<ApiResponse<{ url: string; expiresIn: number }>> {
+  if (USE_MOCK_DATA) {
+    return getMockReportDownloadUrl(reportId);
+  }
+
   return fetchApi<{ url: string; expiresIn: number }>(
     `/reports/${reportId}/download`
   );
@@ -98,6 +134,10 @@ export async function getReportDownloadUrl(
 export async function runBacktest(
   request: BacktestRequest
 ): Promise<ApiResponse<BacktestResponse>> {
+  if (USE_MOCK_DATA) {
+    return runMockBacktest(request);
+  }
+
   return fetchApi<BacktestResponse>("/backtest", {
     method: "POST",
     body: JSON.stringify(request),
@@ -110,13 +150,21 @@ export async function runBacktest(
 export async function getBacktestStatus(
   jobId: string
 ): Promise<ApiResponse<BacktestResponse>> {
+  if (USE_MOCK_DATA) {
+    return getMockBacktestStatus(jobId);
+  }
+
   return fetchApi<BacktestResponse>(`/backtest/${jobId}`);
 }
 
 /**
- * 헬스 체크
+ * 헬스 체크 - 서버가 살아있는지 확인
  */
 export async function healthCheck(): Promise<boolean> {
+  if (USE_MOCK_DATA) {
+    return mockHealthCheck();
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/health`);
     return response.ok;
