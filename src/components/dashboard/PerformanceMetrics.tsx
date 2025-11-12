@@ -1,5 +1,6 @@
 import type { PerformanceMetrics as PerformanceMetricsType } from "@/types";
 import { TrendingUp, Target, Activity, TrendingDown } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface PerformanceMetricsProps {
   performance: PerformanceMetricsType;
@@ -8,6 +9,17 @@ interface PerformanceMetricsProps {
 export default function PerformanceMetrics({
   performance,
 }: PerformanceMetricsProps) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const metrics = [
     {
       label: "평균 수익률",
@@ -48,7 +60,7 @@ export default function PerformanceMetrics({
     <div>
       <h2
         style={{
-          fontSize: "1.5rem",
+          fontSize: isMobile ? "1.25rem" : "1.5rem",
           fontWeight: 700,
           marginBottom: "1.5rem",
           letterSpacing: "-0.01em",
@@ -60,8 +72,10 @@ export default function PerformanceMetrics({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "1.25rem",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: isMobile ? "1rem" : "1.25rem",
         }}
       >
         {metrics.map((metric, index) => (
@@ -72,10 +86,11 @@ export default function PerformanceMetrics({
               backgroundColor: "#111633",
               border: "1px solid #1f2937",
               borderRadius: "16px",
-              padding: "1.75rem 1.5rem",
+              padding: isMobile ? "1.5rem" : "1.75rem 1.5rem",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               cursor: "pointer",
               overflow: "hidden",
+              minHeight: "44px",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-4px)";
@@ -105,14 +120,14 @@ export default function PerformanceMetrics({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "1rem",
+                gap: isMobile ? "0.75rem" : "1rem",
                 position: "relative",
               }}
             >
               <div
                 style={{
-                  width: "56px",
-                  height: "56px",
+                  width: isMobile ? "48px" : "56px",
+                  height: isMobile ? "48px" : "56px",
                   backgroundColor: metric.bgColor,
                   border: `2px solid ${metric.color}44`,
                   borderRadius: "14px",
@@ -122,13 +137,17 @@ export default function PerformanceMetrics({
                   flexShrink: 0,
                 }}
               >
-                <metric.icon size={28} color={metric.color} strokeWidth={2.5} />
+                <metric.icon
+                  size={isMobile ? 24 : 28}
+                  color={metric.color}
+                  strokeWidth={2.5}
+                />
               </div>
 
               <div style={{ flex: 1 }}>
                 <p
                   style={{
-                    fontSize: "0.8125rem",
+                    fontSize: isMobile ? "0.75rem" : "0.8125rem",
                     color: "#9aa0a6",
                     marginBottom: "0.375rem",
                     fontWeight: 500,
@@ -138,7 +157,7 @@ export default function PerformanceMetrics({
                 </p>
                 <p
                   style={{
-                    fontSize: "2rem",
+                    fontSize: isMobile ? "1.5rem" : "2rem",
                     fontWeight: 800,
                     color: metric.color,
                     letterSpacing: "-0.02em",
