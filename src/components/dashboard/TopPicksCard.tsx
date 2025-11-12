@@ -1,6 +1,6 @@
 import type { TradingSignal } from "@/types";
-import { TrendingUp, TrendingDown, Minus, ArrowUpRight } from "lucide-react";
-import { getSectorName } from "@/types";
+import { TrendingUp } from "lucide-react"; // TrendingDown 추가!
+import { useState, useEffect } from "react";
 
 interface TopPicksCardProps {
   signal: TradingSignal;
@@ -8,47 +8,27 @@ interface TopPicksCardProps {
 }
 
 export default function TopPicksCard({ signal, rank }: TopPicksCardProps) {
-  const getSignalColor = (signalType: string) => {
-    switch (signalType) {
-      case "BUY":
-        return "#10b981";
-      case "SELL":
-        return "#ef4444";
-      case "HOLD":
-        return "#f59e0b";
-      default:
-        return "#6b7280";
-    }
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 🔧 숫자 안전하게 변환
+  const safeToFixed = (
+    value: number | string,
+    decimals: number = 1
+  ): string => {
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    return isNaN(num) ? "0.0" : num.toFixed(decimals);
   };
 
-  const getSignalIcon = (signalType: string) => {
-    switch (signalType) {
-      case "BUY":
-        return <TrendingUp size={16} />;
-      case "SELL":
-        return <TrendingDown size={16} />;
-      case "HOLD":
-        return <Minus size={16} />;
-      default:
-        return null;
-    }
-  };
-
-  const getConfidenceColor = (confidence: string) => {
-    switch (confidence) {
-      case "HIGH":
-        return "#10b981";
-      case "MEDIUM":
-        return "#f59e0b";
-      case "LOW":
-        return "#6b7280";
-      default:
-        return "#6b7280";
-    }
-  };
-
-  const signalColor = getSignalColor(signal.signal);
-  const confidenceColor = getConfidenceColor(signal.confidence);
+  const isTopThree = rank <= 3;
 
   return (
     <div
@@ -57,15 +37,17 @@ export default function TopPicksCard({ signal, rank }: TopPicksCardProps) {
         backgroundColor: "#111633",
         border: "1px solid #1f2937",
         borderRadius: "16px",
-        padding: "1.5rem",
+        padding: isMobile ? "1.25rem" : "1.5rem",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         cursor: "pointer",
         overflow: "hidden",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-4px)";
-        e.currentTarget.style.borderColor = "#374151";
-        e.currentTarget.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.3)";
+        e.currentTarget.style.transform = "translateY(-8px)";
+        e.currentTarget.style.borderColor = isTopThree ? "#4c6fff" : "#374151";
+        e.currentTarget.style.boxShadow = isTopThree
+          ? "0 20px 40px rgba(76, 111, 255, 0.3)"
+          : "0 20px 25px -5px rgba(0, 0, 0, 0.3)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)";
@@ -73,80 +55,105 @@ export default function TopPicksCard({ signal, rank }: TopPicksCardProps) {
         e.currentTarget.style.boxShadow = "none";
       }}
     >
+      {/* 배경 그라데이션 */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: "200px",
+          height: "200px",
+          background: isTopThree
+            ? "radial-gradient(circle, rgba(76, 111, 255, 0.15) 0%, transparent 70%)"
+            : "radial-gradient(circle, rgba(55, 65, 81, 0.15) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+
       {/* 랭킹 배지 */}
       <div
         style={{
           position: "absolute",
           top: "-4px",
           right: "-4px",
-          width: "48px",
-          height: "48px",
-          background:
-            rank <= 3
-              ? "linear-gradient(135deg, #4c6fff 0%, #818cf8 100%)"
-              : "linear-gradient(135deg, #374151 0%, #4b5563 100%)",
-          borderRadius: "0 16px 0 24px",
+          width: isMobile ? "44px" : "52px",
+          height: isMobile ? "44px" : "52px",
+          background: isTopThree
+            ? "linear-gradient(135deg, #4c6fff 0%, #818cf8 100%)"
+            : "linear-gradient(135deg, #374151 0%, #4b5563 100%)",
+          borderRadius: "0 16px 0 28px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "1.125rem",
+          fontSize: isMobile ? "1rem" : "1.25rem",
           fontWeight: 800,
           color: "#fff",
-          boxShadow: rank <= 3 ? "0 0 20px rgba(76, 111, 255, 0.4)" : "none",
+          boxShadow: isTopThree ? "0 4px 12px rgba(76, 111, 255, 0.4)" : "none",
         }}
       >
         {rank}
       </div>
 
-      {/* 헤더 */}
-      <div style={{ marginBottom: "1rem" }}>
+      {/* 종목 정보 */}
+      <div style={{ marginBottom: "1rem", position: "relative" }}>
         <div
           style={{
             display: "flex",
-            alignItems: "flex-start",
             justifyContent: "space-between",
-            marginBottom: "0.5rem",
+            alignItems: "flex-start",
+            marginBottom: "0.75rem",
           }}
         >
-          <div>
+          <div style={{ flex: 1 }}>
             <h3
               style={{
-                fontSize: "1.25rem",
-                fontWeight: 700,
-                marginBottom: "0.25rem",
-                letterSpacing: "-0.01em",
+                fontSize: isMobile ? "1.25rem" : "1.5rem",
+                fontWeight: 800,
+                color: "#e8eaed",
+                letterSpacing: "-0.02em",
+                marginBottom: "0.375rem",
               }}
             >
               {signal.symbol}
             </h3>
             <p
               style={{
-                fontSize: "0.875rem",
+                fontSize: isMobile ? "0.8125rem" : "0.875rem",
                 color: "#9aa0a6",
+                lineHeight: 1.4,
               }}
             >
               {signal.companyName}
             </p>
           </div>
+
+          {/* 시그널 타입 배지 */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.375rem",
               padding: "0.5rem 0.875rem",
-              backgroundColor: `${signalColor}22`,
-              border: `1px solid ${signalColor}44`,
+              backgroundColor:
+                signal.signalType === "BUY"
+                  ? "rgba(16, 185, 129, 0.2)"
+                  : "rgba(239, 68, 68, 0.2)",
+              border: `1px solid ${
+                signal.signalType === "BUY"
+                  ? "rgba(16, 185, 129, 0.4)"
+                  : "rgba(239, 68, 68, 0.4)"
+              }`,
               borderRadius: "8px",
-              color: signalColor,
-              fontSize: "0.875rem",
+              color: signal.signalType === "BUY" ? "#10b981" : "#ef4444",
+              fontSize: isMobile ? "0.8125rem" : "0.875rem",
               fontWeight: 700,
+              letterSpacing: "0.05em",
+              flexShrink: 0,
+              marginLeft: "0.75rem",
             }}
           >
-            {getSignalIcon(signal.signal)}
-            {signal.signal}
+            {signal.signalType}
           </div>
         </div>
 
+        {/* 섹터 */}
         <div
           style={{
             display: "inline-flex",
@@ -154,153 +161,194 @@ export default function TopPicksCard({ signal, rank }: TopPicksCardProps) {
             gap: "0.375rem",
             padding: "0.375rem 0.75rem",
             backgroundColor: "#1a1f3a",
+            border: "1px solid #374151",
             borderRadius: "6px",
-            fontSize: "0.8125rem",
+            fontSize: isMobile ? "0.75rem" : "0.8125rem",
             color: "#9aa0a6",
           }}
         >
-          <span style={{ color: "#4c6fff" }}>●</span>
-          {getSectorName(signal.sector)}
+          <div
+            style={{
+              width: "6px",
+              height: "6px",
+              backgroundColor: "#4c6fff",
+              borderRadius: "50%",
+            }}
+          />
+          {signal.sector}
         </div>
       </div>
 
-      {/* 수출 데이터 */}
+      {/* 성장률 */}
       <div
         style={{
-          backgroundColor: "#0a0e27",
-          borderRadius: "10px",
-          padding: "1rem",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "0.75rem",
           marginBottom: "1rem",
         }}
       >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "1rem",
+            padding: isMobile ? "0.875rem" : "1rem",
+            backgroundColor: "#0a0e27",
+            borderRadius: "10px",
+            border: "1px solid #1f2937",
           }}
         >
-          <div>
-            <p
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              marginBottom: "0.375rem",
+            }}
+          >
+            <TrendingUp size={14} color="#10b981" />
+            <span
               style={{
-                fontSize: "0.75rem",
+                fontSize: isMobile ? "0.6875rem" : "0.75rem",
                 color: "#9aa0a6",
-                marginBottom: "0.25rem",
               }}
             >
               YoY 성장률
-            </p>
-            <p
-              style={{
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                color: signal.yoyGrowth >= 0 ? "#10b981" : "#ef4444",
-              }}
-            >
-              {signal.yoyGrowth >= 0 ? "+" : ""}
-              {signal.yoyGrowth.toFixed(1)}%
-            </p>
+            </span>
           </div>
-          <div>
-            <p
+          <p
+            style={{
+              fontSize: isMobile ? "1.25rem" : "1.5rem",
+              fontWeight: 700,
+              color: "#10b981",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            +{safeToFixed(signal.yoyGrowth)}%
+          </p>
+        </div>
+
+        <div
+          style={{
+            padding: isMobile ? "0.875rem" : "1rem",
+            backgroundColor: "#0a0e27",
+            borderRadius: "10px",
+            border: "1px solid #1f2937",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              marginBottom: "0.375rem",
+            }}
+          >
+            <TrendingUp size={14} color="#10b981" />
+            <span
               style={{
-                fontSize: "0.75rem",
+                fontSize: isMobile ? "0.6875rem" : "0.75rem",
                 color: "#9aa0a6",
-                marginBottom: "0.25rem",
               }}
             >
               MoM 성장률
+            </span>
+          </div>
+          <p
+            style={{
+              fontSize: isMobile ? "1.25rem" : "1.5rem",
+              fontWeight: 700,
+              color: "#10b981",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            +{safeToFixed(signal.momGrowth)}%
+          </p>
+        </div>
+      </div>
+
+      {/* 예상 수익률 */}
+      <div
+        style={{
+          padding: isMobile ? "1rem" : "1.25rem",
+          background:
+            "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.2) 100%)",
+          border: "1px solid rgba(16, 185, 129, 0.3)",
+          borderRadius: "12px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            fontSize: isMobile ? "4rem" : "5rem",
+            fontWeight: 900,
+            color: "rgba(16, 185, 129, 0.05)",
+            lineHeight: 1,
+            pointerEvents: "none",
+          }}
+        >
+          {rank}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <p
+              style={{
+                fontSize: isMobile ? "0.75rem" : "0.8125rem",
+                color: "#9aa0a6",
+                marginBottom: "0.375rem",
+                fontWeight: 500,
+              }}
+            >
+              예상 수익률 <span style={{ fontSize: "0.75rem" }}>(20일)</span>
             </p>
             <p
               style={{
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                color: signal.momGrowth >= 0 ? "#10b981" : "#ef4444",
+                fontSize: isMobile ? "1.75rem" : "2rem",
+                fontWeight: 800,
+                color: "#10b981",
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
               }}
             >
-              {signal.momGrowth >= 0 ? "+" : ""}
-              {signal.momGrowth.toFixed(1)}%
+              +{safeToFixed(signal.expectedReturn)}%
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* 예측 수익률 */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "1rem",
-          background: `linear-gradient(135deg, ${signalColor}11 0%, ${signalColor}22 100%)`,
-          border: `1px solid ${signalColor}33`,
-          borderRadius: "10px",
-          marginBottom: "1rem",
-        }}
-      >
-        <div>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "#9aa0a6",
-              marginBottom: "0.25rem",
-            }}
-          >
-            예상 수익률 (20일)
-          </p>
-          <p
-            style={{ fontSize: "1.75rem", fontWeight: 800, color: signalColor }}
-          >
-            {signal.expectedReturn20d >= 0 ? "+" : ""}
-            {signal.expectedReturn20d.toFixed(2)}%
-          </p>
-        </div>
-        <ArrowUpRight size={32} color={signalColor} strokeWidth={3} />
-      </div>
-
-      {/* 신뢰도 & 기술적 지표 */}
-      <div style={{ display: "flex", gap: "0.75rem", fontSize: "0.8125rem" }}>
-        <div style={{ flex: 1 }}>
-          <p style={{ color: "#9aa0a6", marginBottom: "0.375rem" }}>신뢰도</p>
           <div
             style={{
-              padding: "0.5rem",
-              backgroundColor: "#1a1f3a",
-              borderRadius: "6px",
-              textAlign: "center",
-              color: confidenceColor,
-              fontWeight: 700,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: "0.25rem",
             }}
           >
-            {signal.confidence}
-          </div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ color: "#9aa0a6", marginBottom: "0.375rem" }}>RSI</p>
-          <div
-            style={{
-              padding: "0.5rem",
-              backgroundColor: "#1a1f3a",
-              borderRadius: "6px",
-              textAlign: "center",
-              fontWeight: 700,
-            }}
-          >
-            {signal.rsi.toFixed(1)}
-          </div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ color: "#9aa0a6", marginBottom: "0.375rem" }}>거래량</p>
-          <div
-            style={{
-              padding: "0.5rem",
-              backgroundColor: "#1a1f3a",
-              borderRadius: "6px",
-              textAlign: "center",
-              fontWeight: 700,
-            }}
-          >
-            {signal.volumeRatio.toFixed(2)}x
+            <div
+              style={{
+                fontSize: isMobile ? "0.6875rem" : "0.75rem",
+                color: "#9aa0a6",
+              }}
+            >
+              신뢰도
+            </div>
+            <div
+              style={{
+                fontSize: isMobile ? "1rem" : "1.125rem",
+                fontWeight: 700,
+                color: "#4c6fff",
+              }}
+            >
+              {safeToFixed(signal.confidenceScore)}%
+            </div>
           </div>
         </div>
       </div>
