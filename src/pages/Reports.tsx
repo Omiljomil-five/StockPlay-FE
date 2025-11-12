@@ -11,11 +11,19 @@ export default function Reports() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const itemsPerPage = 10;
 
   useEffect(() => {
     loadReports();
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [currentPage]);
 
   const loadReports = async () => {
@@ -119,6 +127,8 @@ export default function Reports() {
               cursor: "pointer",
               fontWeight: 600,
               fontSize: "0.875rem",
+              minHeight: "44px",
+              minWidth: "44px",
             }}
           >
             다시 시도
@@ -140,7 +150,7 @@ export default function Reports() {
       >
         <div
           style={{
-            padding: "3rem",
+            padding: isMobile ? "2rem" : "3rem",
             backgroundColor: "#111633",
             borderRadius: "16px",
             border: "1px solid #1f2937",
@@ -149,14 +159,24 @@ export default function Reports() {
           }}
         >
           <FileText
-            size={64}
+            size={isMobile ? 48 : 64}
             color="#4c6fff"
             style={{ marginBottom: "1.5rem", opacity: 0.5 }}
           />
-          <h2 style={{ fontSize: "1.5rem", marginBottom: "0.75rem" }}>
+          <h2
+            style={{
+              fontSize: isMobile ? "1.25rem" : "1.5rem",
+              marginBottom: "0.75rem",
+            }}
+          >
             리포트가 없습니다
           </h2>
-          <p style={{ color: "#9aa0a6", fontSize: "0.9375rem" }}>
+          <p
+            style={{
+              color: "#9aa0a6",
+              fontSize: isMobile ? "0.8125rem" : "0.9375rem",
+            }}
+          >
             아직 생성된 리포트가 없습니다. 첫 번째 리포트가 생성되면 여기에
             표시됩니다.
           </p>
@@ -168,19 +188,20 @@ export default function Reports() {
   return (
     <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
       {/* 헤더 */}
-      <div style={{ marginBottom: "2rem" }}>
+      <div style={{ marginBottom: isMobile ? "1.5rem" : "2rem" }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
             marginBottom: "0.5rem",
+            flexWrap: "wrap",
           }}
         >
-          <FileText size={28} color="#4c6fff" />
+          <FileText size={isMobile ? 24 : 28} color="#4c6fff" />
           <h1
             style={{
-              fontSize: "2rem",
+              fontSize: isMobile ? "1.5rem" : "2rem",
               fontWeight: 700,
               letterSpacing: "-0.02em",
             }}
@@ -191,28 +212,44 @@ export default function Reports() {
         <p
           style={{
             color: "#9aa0a6",
-            fontSize: "0.9375rem",
+            fontSize: isMobile ? "0.8125rem" : "0.9375rem",
+            marginBottom: "1rem",
           }}
         >
           매월 생성된 트레이딩 시그널 리포트를 확인하고 다운로드할 수 있습니다
         </p>
         <div
           style={{
-            marginTop: "1rem",
-            padding: "1rem 1.25rem",
+            padding: isMobile ? "0.75rem 1rem" : "1rem 1.25rem",
             backgroundColor: "rgba(76, 111, 255, 0.1)",
             border: "1px solid rgba(76, 111, 255, 0.2)",
             borderRadius: "10px",
             display: "inline-block",
           }}
         >
-          <span style={{ color: "#9aa0a6", fontSize: "0.875rem" }}>총 </span>
           <span
-            style={{ color: "#4c6fff", fontWeight: 700, fontSize: "0.875rem" }}
+            style={{
+              color: "#9aa0a6",
+              fontSize: isMobile ? "0.8125rem" : "0.875rem",
+            }}
+          >
+            총{" "}
+          </span>
+          <span
+            style={{
+              color: "#4c6fff",
+              fontWeight: 700,
+              fontSize: isMobile ? "0.8125rem" : "0.875rem",
+            }}
           >
             {total}개
           </span>
-          <span style={{ color: "#9aa0a6", fontSize: "0.875rem" }}>
+          <span
+            style={{
+              color: "#9aa0a6",
+              fontSize: isMobile ? "0.8125rem" : "0.875rem",
+            }}
+          >
             {" "}
             리포트
           </span>
@@ -223,8 +260,10 @@ export default function Reports() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(500px, 1fr))",
-          gap: "1.5rem",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "repeat(auto-fill, minmax(500px, 1fr))",
+          gap: isMobile ? "1rem" : "1.5rem",
           marginBottom: "3rem",
         }}
       >
