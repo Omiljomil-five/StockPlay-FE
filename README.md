@@ -71,3 +71,6 @@ export default defineConfig([
   },
 ])
 ```
+
+## 🚀 Latest Update
+- AWS Lambda API 연동 완료
