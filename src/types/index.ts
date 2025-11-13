@@ -20,6 +20,7 @@ export interface TradingSignal {
   kospiReturn?: number; // ✅ KOSPI 수익률 추가
   confidenceScore: number;
   period?: string; // 1d, 5d, 10d, 20d
+  momGrowth?: number;
 }
 
 // 성과 지표
@@ -35,7 +36,7 @@ export interface PerformanceMetrics {
 export interface SectorAnalysis {
   sector: string;
   avgYoYGrowth: number;
-  // avgMoMGrowth: number; ❌ 제거됨
+  avgMoMGrowth: number;
   signalCount: number;
   color: string;
   period?: string; // 1d, 5d, 10d, 20d
