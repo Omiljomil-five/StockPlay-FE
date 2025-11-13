@@ -11,11 +11,15 @@ export interface TradingSignal {
   symbol: string;
   companyName: string;
   sector: string;
-  signalType: "BUY" | "SELL";
+  signalType: "BUY" | "SELL" | "HOLD"; // ✅ HOLD 추가
+  surpriseZ?: number; // ✅ Surprise Z-Score 추가
   yoyGrowth: number;
-  momGrowth: number;
+  // momGrowth: number; ❌ 제거됨
   expectedReturn: number;
+  vsKospi?: number; // ✅ KOSPI 대비 추가
+  kospiReturn?: number; // ✅ KOSPI 수익률 추가
   confidenceScore: number;
+  period?: string; // 1d, 5d, 10d, 20d
 }
 
 // 성과 지표
@@ -24,15 +28,17 @@ export interface PerformanceMetrics {
   winRate: number;
   sharpeRatio: number;
   maxDrawdown: number;
+  period?: string; // 1d, 5d, 10d, 20d
 }
 
 // 섹터 분석
 export interface SectorAnalysis {
   sector: string;
   avgYoYGrowth: number;
-  avgMoMGrowth: number;
+  // avgMoMGrowth: number; ❌ 제거됨
   signalCount: number;
   color: string;
+  period?: string; // 1d, 5d, 10d, 20d
 }
 
 // 분석 결과
@@ -56,6 +62,7 @@ export interface Report {
 // Query 파라미터
 export interface SignalsQueryParams {
   sector?: string;
+  period?: string; // 1d, 5d, 10d, 20d
   limit?: number;
 }
 
@@ -81,18 +88,6 @@ export interface BacktestResponse {
     sharpeRatio: number;
     maxDrawdown: number;
   };
-}
-
-// 구독 관련 타입
-export interface SubscribeRequest {
-  email: string;
-}
-
-export interface SubscriptionData {
-  email: string;
-  notification_enabled: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 // 구독 관련 타입

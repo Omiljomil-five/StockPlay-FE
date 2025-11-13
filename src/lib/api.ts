@@ -71,12 +71,15 @@ async function fetchApi<T>(
 
 /**
  * GET /api/signals - 최신 트레이딩 시그널 조회
+ * @param params.sector - 섹터 필터 (optional)
+ * @param params.period - 예측 기간: 1d, 5d, 10d, 20d (optional, default: 1d)
+ * @param params.limit - 결과 개수 (optional, default: 20)
  */
 export async function getSignals(
-  params?: SignalsQueryParams
+  params?: SignalsQueryParams & { period?: string }
 ): Promise<ApiResponse<AnalysisResult>> {
   if (USE_MOCK_DATA) {
-    console.log("📦 Using Mock Data for getSignals");
+    console.log("📦 Using Mock Data for getSignals", { params });
     return getMockSignals(params);
   }
 
