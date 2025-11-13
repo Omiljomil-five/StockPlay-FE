@@ -1,18 +1,16 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, FileText, X } from "lucide-react";
+import { TrendingUp, FileText, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const navItems = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/reports", label: "Reports", icon: FileText },
-];
-
 interface NavigationProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Navigation({ isOpen, onClose }: NavigationProps) {
+export default function Navigation({
+  isOpen = true,
+  onClose,
+}: NavigationProps) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -24,94 +22,114 @@ export default function Navigation({ isOpen, onClose }: NavigationProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 모바일에서는 메뉴 클릭 시 닫기
-  const handleNavClick = () => {
-    if (isMobile) {
+  const navItems = [
+    { path: "/subscribe", icon: Mail, label: "구독하기" },
+    { path: "/dashboard", icon: TrendingUp, label: "대시보드" },
+    { path: "/reports", icon: FileText, label: "리포트" },
+  ];
+
+  const handleClick = () => {
+    // 스크롤 상단으로
+    window.scrollTo(0, 0);
+
+    if (onClose) {
       onClose();
     }
   };
 
+  const getLinkStyle = (isActive: boolean) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: "0.75rem",
+    padding: isMobile ? "1rem 1.5rem" : "0.75rem 1rem",
+    borderRadius: isMobile ? "0" : "8px",
+    textDecoration: "none",
+    color: isActive ? "#4c6fff" : "#9aa0a6",
+    backgroundColor: isActive ? "rgba(76, 111, 255, 0.1)" : "transparent",
+    fontWeight: isActive ? 600 : 500,
+    fontSize: isMobile ? "1rem" : "0.9375rem",
+    transition: "all 0.2s ease",
+    borderLeft: isMobile && isActive ? "3px solid #4c6fff" : "none",
+    minHeight: "44px",
+    minWidth: "44px",
+    cursor: "pointer",
+  });
+
+  // 모바일: 사이드바 슬라이드
+  if (isMobile) {
+    return (
+      <aside
+        style={{
+          position: "fixed",
+          top: "64px",
+          left: 0,
+          bottom: 0,
+          width: "280px",
+          backgroundColor: "#0a0e27",
+          borderRight: "1px solid #1f2937",
+          transform: isOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.3s ease",
+          zIndex: 1000,
+          overflowY: "auto",
+        }}
+      >
+        <nav
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0",
+            padding: "1rem 0",
+          }}
+        >
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              style={({ isActive }) => getLinkStyle(isActive)}
+              onClick={handleClick}
+            >
+              <item.icon size={20} />
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+    );
+  }
+
+  // 데스크톱: 고정 사이드바
   return (
-    <nav
+    <aside
       style={{
-        width: isMobile ? "80%" : "240px",
-        maxWidth: isMobile ? "300px" : "240px",
-        backgroundColor: "#111633",
+        width: "240px",
+        backgroundColor: "#0a0e27",
         borderRight: "1px solid #1f2937",
         padding: "1.5rem 1rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        position: isMobile ? "fixed" : "relative",
-        top: isMobile ? 0 : "auto",
-        left: isMobile ? (isOpen ? 0 : "-100%") : 0,
-        bottom: isMobile ? 0 : "auto",
-        zIndex: 1000,
-        transition: "left 0.3s ease",
+        position: "sticky",
+        top: "64px",
+        height: "calc(100vh - 64px)",
         overflowY: "auto",
       }}
     >
-      {/* 닫기 버튼 - 모바일에서만 표시 */}
-      {isMobile && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "1rem",
-          }}
-        >
-          <button
-            onClick={onClose}
-            style={{
-              width: "40px",
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: "pointer",
-              borderRadius: "8px",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#1a1f3a";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
+      <nav
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+        }}
+      >
+        {navItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            style={({ isActive }) => getLinkStyle(isActive)}
+            onClick={handleClick}
           >
-            <X size={24} color="#9aa0a6" />
-          </button>
-        </div>
-      )}
-
-      {/* 네비게이션 아이템 */}
-      {navItems.map((item) => (
-        <NavLink
-          key={item.path}
-          to={item.path}
-          onClick={handleNavClick}
-          style={({ isActive }) => ({
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            padding: "0.875rem 1rem",
-            borderRadius: "10px",
-            color: isActive ? "#e8eaed" : "#9aa0a6",
-            backgroundColor: isActive ? "#1a1f3a" : "transparent",
-            border: isActive ? "1px solid #374151" : "1px solid transparent",
-            transition: "all 0.2s ease",
-            fontWeight: isActive ? 600 : 400,
-            fontSize: "0.9375rem",
-            textDecoration: "none",
-            minHeight: "44px", // 터치 영역 최소 크기
-          })}
-        >
-          <item.icon size={20} />
-          {item.label}
-        </NavLink>
-      ))}
-    </nav>
+            <item.icon size={20} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+    </aside>
   );
 }

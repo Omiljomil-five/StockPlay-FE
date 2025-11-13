@@ -82,3 +82,27 @@ export interface BacktestResponse {
     maxDrawdown: number;
   };
 }
+
+// 구독 관련 타입
+export interface SubscribeRequest {
+  email: string;
+}
+
+export interface SubscriptionData {
+  email: string;
+  notification_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// 구독 관련 타입
+export interface SubscribeRequest {
+  email: string;
+}
+
+export interface SubscriptionData {
+  email: string;
+  notification_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
