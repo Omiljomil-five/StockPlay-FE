@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -66,15 +67,20 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </button>
         )}
 
-        {/* 로고 */}
-        <img
-          src="/assets/StockPlay.png"
-          alt="StockPlay Logo"
-          style={{
-            height: isMobile ? "210px" : "240px",
-            width: "auto",
-          }}
-        />
+        {/* 로고 - 클릭하면 홈(구독하기)으로 이동 */}
+        <Link
+          to="/subscribe"
+          style={{ textDecoration: "none", cursor: "pointer" }}
+        >
+          <img
+            src="/assets/StockPlay.png"
+            alt="StockPlay Logo"
+            style={{
+              height: isMobile ? "210px" : "240px",
+              width: "auto",
+            }}
+          />
+        </Link>
       </div>
 
       {/* 실시간 데이터 분석중 - 데스크톱에서만 표시 */}
