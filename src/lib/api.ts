@@ -6,6 +6,7 @@ import type {
   ReportsQueryParams,
   BacktestRequest,
   BacktestResponse,
+  SubscriptionData,
 } from "@/types";
 
 // Mock API import (상대 경로 사용)
@@ -171,4 +172,16 @@ export async function healthCheck(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * POST /api/subscribe - 이메일 구독
+ */
+export async function subscribe(
+  email: string
+): Promise<ApiResponse<SubscriptionData>> {
+  return fetchApi<SubscriptionData>("/subscribe", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
