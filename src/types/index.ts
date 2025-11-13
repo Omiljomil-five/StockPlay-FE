@@ -101,3 +101,30 @@ export interface SubscriptionData {
   created_at: string;
   updated_at: string;
 }
+
+export interface DownloadResponse {
+  url: string;
+  expiresIn: number;
+  filename?: string;
+  contentType?: string;
+}
+
+export interface PdfGenerationRequest {
+  symbol: string;
+  sector: string;
+  signalType: "BUY" | "HOLD" | "SELL";
+  period: string;
+  expectedReturn: number;
+  vsKospi: number;
+  kospiReturn: number;
+  surpriseZ: number;
+  yoyGrowth: number;
+  confidenceScore: number;
+}
+
+export interface PdfGenerationResponse {
+  url: string;
+  filename: string;
+  message: string;
+  ai_used: boolean;
+}
