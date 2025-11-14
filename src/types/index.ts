@@ -101,6 +101,8 @@ export interface SubscriptionData {
   notification_enabled: boolean;
   created_at: string;
   updated_at: string;
+  is_new_subscriber?: boolean; // 신규 구독자 여부
+  message?: string; // 응답 메시지
 }
 
 export interface DownloadResponse {

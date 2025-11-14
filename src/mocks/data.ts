@@ -88,15 +88,15 @@ export const mockAnalysisResult: AnalysisResult = {
   totalSignals: mockTradingSignals.length,
 };
 
-// Mock 리포트 (6개월치)
-export const mockReports: Report[] = Array.from({ length: 6 }, (_, i) => {
-  const date = new Date();
-  date.setMonth(date.getMonth() - i);
+// Mock 리포트 (2024년 6월~12월)
+export const mockReports: Report[] = Array.from({ length: 7 }, (_, i) => {
+  const month = 12 - i; // 12월부터 6월까지 역순
+  const date = new Date(2024, month - 1, 1); // 2024년, 해당 월의 1일
 
   return {
-    id: `report-2024-${String(11 - i).padStart(2, "0")}`,
+    id: `report-2024-${String(month).padStart(2, "0")}`,
     date: date.toISOString(),
-    pdfUrl: `/reports/2024-${String(11 - i).padStart(2, "0")}-report.pdf`,
+    pdfUrl: `/reports/2024-${String(month).padStart(2, "0")}-report.pdf`,
     analysisResult: {
       ...mockAnalysisResult,
       date: date.toISOString(),
