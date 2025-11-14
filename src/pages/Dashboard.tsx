@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSignals } from "@/lib/api";
+import { getSignals, generatePdf } from "@/lib/api";
 import type { AnalysisResult, TradingSignal } from "@/types";
 import {
   TrendingUp,
@@ -53,10 +53,36 @@ export default function Dashboard() {
 
   const downloadPDF = async (signal: TradingSignal) => {
     try {
-      // TODO: PDF 다운로드 API 구현
-      alert(`${signal.symbol} PDF 다운로드 기능 준비 중입니다.`);
+      // 백엔드 스키마에 맞게 필수 필드 채우기
+      const pdfRequest = {
+        symbol: signal.symbol,
+        companyName: signal.companyName,
+        sector: signal.sector,
+        signalType: signal.signalType,
+        period: signal.period || '1d',
+        expectedReturn: signal.expectedReturn,
+        vsKospi: signal.vsKospi ?? 0,
+        kospiReturn: signal.kospiReturn ?? 0,
+        surpriseZ: signal.surpriseZ ?? 0,
+        yoyGrowth: signal.yoyGrowth,
+        confidenceScore: signal.confidenceScore,
+      };
+
+      const response = await generatePdf(pdfRequest as any);
+
+      if (response.success && response.data.url) {
+        // PDF 다운로드 URL로 새 탭 열기
+        // presigned URL이면 전체 URL이므로 그대로 사용, 상대 경로면 API URL과 결합
+        const downloadUrl = response.data.url.startsWith('http')
+          ? response.data.url
+          : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${response.data.url}`;
+        window.open(downloadUrl, '_blank');
+      } else {
+        alert(response.error || "PDF 생성에 실패했습니다.");
+      }
     } catch (error) {
       console.error("PDF 다운로드 실패:", error);
+      alert("PDF 다운로드 중 오류가 발생했습니다.");
     }
   };
 
@@ -487,6 +513,20 @@ function SignalDistributionChart({
             매도 {sell}개 ({sellPercent.toFixed(0)}%)
           </span>
         </div>
+      </div>
+
+      {/* 데이터 기준일 */}
+      <div
+        style={{
+          marginTop: "1rem",
+          paddingTop: "1rem",
+          borderTop: "1px solid #2a2f4a",
+          textAlign: "center",
+        }}
+      >
+        <span style={{ color: "#6b7280", fontSize: "0.75rem" }}>
+          데이터 기준일: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </span>
       </div>
     </div>
   );
