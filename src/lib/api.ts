@@ -7,6 +7,7 @@ import type {
   BacktestRequest,
   BacktestResponse,
   SubscriptionData,
+  TradingSignal,
 } from "@/types";
 
 // Mock API import (상대 경로 사용)
@@ -187,4 +188,30 @@ export async function subscribe(
     method: "POST",
     body: JSON.stringify({ email }),
   });
+}
+
+/**
+ * DELETE /api/subscribe/{email} - 구독 취소
+ */
+export async function unsubscribe(
+  email: string
+): Promise<ApiResponse<{ message: string }>> {
+  return fetchApi<{ message: string }>(`/subscribe/${encodeURIComponent(email)}`, {
+    method: "DELETE",
+  });
+}
+
+/**
+ * POST /api/reports/generate - PDF 생성
+ */
+export async function generatePdf(
+  signal: TradingSignal
+): Promise<ApiResponse<{ url: string; filename: string; message: string }>> {
+  return fetchApi<{ url: string; filename: string; message: string }>(
+    "/reports/generate",
+    {
+      method: "POST",
+      body: JSON.stringify(signal),
+    }
+  );
 }
