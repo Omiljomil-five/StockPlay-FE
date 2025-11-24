@@ -20,6 +20,7 @@ export interface TradingSignal {
   kospiReturn?: number; // ✅ KOSPI 수익률 추가
   confidenceScore: number;
   period?: string; // 1d, 5d, 10d, 20d
+  momGrowth?: number;
 }
 
 // 성과 지표
@@ -35,7 +36,7 @@ export interface PerformanceMetrics {
 export interface SectorAnalysis {
   sector: string;
   avgYoYGrowth: number;
-  // avgMoMGrowth: number; ❌ 제거됨
+  avgMoMGrowth: number;
   signalCount: number;
   color: string;
   period?: string; // 1d, 5d, 10d, 20d
@@ -100,4 +101,33 @@ export interface SubscriptionData {
   notification_enabled: boolean;
   created_at: string;
   updated_at: string;
+  is_new_subscriber?: boolean; // 신규 구독자 여부
+  message?: string; // 응답 메시지
+}
+
+export interface DownloadResponse {
+  url: string;
+  expiresIn: number;
+  filename?: string;
+  contentType?: string;
+}
+
+export interface PdfGenerationRequest {
+  symbol: string;
+  sector: string;
+  signalType: "BUY" | "HOLD" | "SELL";
+  period: string;
+  expectedReturn: number;
+  vsKospi: number;
+  kospiReturn: number;
+  surpriseZ: number;
+  yoyGrowth: number;
+  confidenceScore: number;
+}
+
+export interface PdfGenerationResponse {
+  url: string;
+  filename: string;
+  message: string;
+  ai_used: boolean;
 }

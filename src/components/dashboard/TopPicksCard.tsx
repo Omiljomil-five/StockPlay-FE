@@ -19,11 +19,14 @@ export default function TopPicksCard({ signal, rank }: TopPicksCardProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 🔧 숫자 안전하게 변환
+  // 🔧 숫자 안전하게 변환 (undefined 처리 추가)
   const safeToFixed = (
-    value: number | string,
+    value: number | string | undefined,
     decimals: number = 1
   ): string => {
+    if (value === undefined || value === null) {
+      return "0.0";
+    }
     const num = typeof value === "string" ? parseFloat(value) : value;
     return isNaN(num) ? "0.0" : num.toFixed(decimals);
   };
