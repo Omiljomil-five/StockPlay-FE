@@ -54,25 +54,36 @@ export default function SubscribeForm() {
       if (response.success) {
         const data = response.data;
 
-        // 백엔드에서 반환한 메시지 사용
-        if (data.message) {
-          setMessage({
-            type: data.is_new_subscriber ? "success" : "info",
-            text: data.is_new_subscriber
-              ? `✅ ${data.message}`
-              : `ℹ️ ${data.message}`,
-          });
-        } else {
-          // fallback
-          setMessage({
-            type: "success",
-            text: "✅ 구독이 완료되었습니다! 매일 오전 9시에 리포트를 보내드립니다.",
-          });
-        }
-
-        // 신규 구독자인 경우에만 이메일 필드 초기화
         if (data.is_new_subscriber) {
+          // 신규 구독자
+          if (data.email_sent) {
+            setMessage({
+              type: "success",
+              text: "✅ 구독이 완료되었습니다! 환영 이메일을 확인해주세요.",
+            });
+          } else if (data.email_sent === false) {
+            setMessage({
+              type: "warning",
+              text: "✅ 구독은 완료되었지만, 환영 이메일 전송에 실패했습니다. 리포트는 내일 오전 9시부터 정상 발송됩니다.",
+            });
+          } else {
+            // email_sent가 없는 경우 (이전 버전 호환)
+            setMessage({
+              type: "success",
+              text: data.message
+                ? `✅ ${data.message}`
+                : "✅ 구독이 완료되었습니다! 매일 오전 9시에 리포트를 보내드립니다.",
+            });
+          }
           setEmail("");
+        } else {
+          // 기존 구독자
+          setMessage({
+            type: "info",
+            text: data.message
+              ? `ℹ️ ${data.message}`
+              : "ℹ️ 이미 구독 중인 이메일입니다.",
+          });
         }
       } else {
         setMessage({
