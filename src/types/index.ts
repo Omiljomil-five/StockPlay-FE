@@ -103,6 +103,7 @@ export interface SubscriptionData {
   updated_at: string;
   is_new_subscriber?: boolean; // 신규 구독자 여부
   message?: string; // 응답 메시지
+  email_sent?: boolean; // 환영 이메일 전송 성공 여부
 }
 
 export interface DownloadResponse {
